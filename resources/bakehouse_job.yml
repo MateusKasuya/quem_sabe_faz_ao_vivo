@@ -1,0 +1,13 @@
+resources:
+  jobs:
+    bakehouse_medallion_job:
+      name: "[${bundle.target}] bakehouse_medallion_job"
+      tasks:
+        - task_key: refresh_medallion
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.bakehouse_medallion.id}
+      schedule:
+        # Daily at 06:00 America/Sao_Paulo. Paused in dev by bundle mode: development.
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: "America/Sao_Paulo"
+        pause_status: PAUSED

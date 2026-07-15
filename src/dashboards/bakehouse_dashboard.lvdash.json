@@ -1,0 +1,722 @@
+{
+  "datasets": [
+    {
+      "name": "kpis",
+      "displayName": "KPIs",
+      "queryLines": [
+        "SELECT   SUM(total_price) AS revenue,   COUNT(*) AS orders,   AVG(total_price) AS avg_ticket,   COUNT(DISTINCT franchise_id) AS franchises FROM silver_transactions"
+      ],
+      "catalog": "workspace",
+      "schema": "mateusvbkasuya_test"
+    },
+    {
+      "name": "daily_revenue",
+      "displayName": "Daily revenue",
+      "queryLines": [
+        "SELECT transaction_date, SUM(revenue) AS revenue FROM gold_daily_sales_by_franchise GROUP BY transaction_date ORDER BY transaction_date"
+      ],
+      "catalog": "workspace",
+      "schema": "mateusvbkasuya_test"
+    },
+    {
+      "name": "by_product",
+      "displayName": "Revenue by product",
+      "queryLines": [
+        "SELECT product, revenue, units_sold FROM gold_sales_by_product ORDER BY revenue DESC"
+      ],
+      "catalog": "workspace",
+      "schema": "mateusvbkasuya_test"
+    },
+    {
+      "name": "by_country",
+      "displayName": "Revenue by country",
+      "queryLines": [
+        "SELECT   country,   CASE WHEN country = 'USA' THEN 'United States' ELSE country END AS country_map_name,   revenue,   orders FROM gold_sales_by_country ORDER BY revenue DESC"
+      ],
+      "catalog": "workspace",
+      "schema": "mateusvbkasuya_test"
+    },
+    {
+      "name": "payment_mix",
+      "displayName": "Payment mix",
+      "queryLines": [
+        "SELECT payment_method, COUNT(*) AS orders, SUM(total_price) AS revenue FROM silver_transactions GROUP BY payment_method ORDER BY orders DESC"
+      ],
+      "catalog": "workspace",
+      "schema": "mateusvbkasuya_test"
+    },
+    {
+      "name": "franchise_perf",
+      "displayName": "Franchise ranking",
+      "queryLines": [
+        "SELECT franchise_name, franchise_city, franchise_country, revenue, orders, avg_ticket FROM gold_franchise_performance ORDER BY revenue DESC LIMIT 15"
+      ],
+      "catalog": "workspace",
+      "schema": "mateusvbkasuya_test"
+    },
+    {
+      "name": "sentiment",
+      "displayName": "Review sentiment",
+      "queryLines": [
+        "SELECT sentiment, COUNT(*) AS review_count FROM silver_reviews_sentiment GROUP BY sentiment ORDER BY review_count DESC"
+      ],
+      "catalog": "workspace",
+      "schema": "mateusvbkasuya_test"
+    }
+  ],
+  "pages": [
+    {
+      "name": "overview",
+      "displayName": "Visão Geral",
+      "layout": [
+        {
+          "widget": {
+            "name": "title",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Bakehouse — Vendas & Sentimento"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "subtitle",
+            "multilineTextboxSpec": {
+              "lines": [
+                "Receita, pedidos, desempenho por franquia/país e satisfação dos clientes (via IA) — rede de padarias Bakehouse."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi-revenue",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "kpis",
+                  "fields": [
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "revenue",
+                  "displayName": "Receita total",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Receita total"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi-orders",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "kpis",
+                  "fields": [
+                    {
+                      "name": "orders",
+                      "expression": "`orders`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "orders",
+                  "displayName": "Pedidos",
+                  "format": {
+                    "type": "number",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 0
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Pedidos"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 2,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi-avg-ticket",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "kpis",
+                  "fields": [
+                    {
+                      "name": "avg_ticket",
+                      "expression": "`avg_ticket`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_ticket",
+                  "displayName": "Ticket médio",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "fixed",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Ticket médio"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi-franchises",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "kpis",
+                  "fields": [
+                    {
+                      "name": "franchises",
+                      "expression": "`franchises`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "franchises",
+                  "displayName": "Franquias ativas"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Franquias ativas"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 2,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "header-trends",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Receita ao longo do tempo"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "daily-revenue-line",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_revenue",
+                  "fields": [
+                    {
+                      "name": "transaction_date",
+                      "expression": "`transaction_date`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "transaction_date",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Data"
+                },
+                "y": {
+                  "fieldName": "revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Receita ($)",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 0
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Receita diária"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue-by-product",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "by_product",
+                  "fields": [
+                    {
+                      "name": "product",
+                      "expression": "`product`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Receita ($)",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 0
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "product",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Produto"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Receita por produto"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "header-geo",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Geografia & Meio de pagamento"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "map-by-country",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "by_country",
+                  "fields": [
+                    {
+                      "name": "country_map_name",
+                      "expression": "`country_map_name`"
+                    },
+                    {
+                      "name": "sum(revenue)",
+                      "expression": "SUM(`revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "choropleth-map",
+              "encodings": {
+                "region": {
+                  "regionType": "mapbox-v4-admin",
+                  "admin0": {
+                    "fieldName": "country_map_name",
+                    "type": "field",
+                    "geographicRole": "admin0-name"
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(revenue)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Receita ($)",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 0
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Receita por país (mapa)"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "payment-mix-pie",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "payment_mix",
+                  "fields": [
+                    {
+                      "name": "payment_method",
+                      "expression": "`payment_method`"
+                    },
+                    {
+                      "name": "orders",
+                      "expression": "`orders`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "orders",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Pedidos"
+                },
+                "color": {
+                  "fieldName": "payment_method",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Meio de pagamento"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Mix de meio de pagamento"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "header-franchise-sentiment",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Ranking de franquias & Sentimento"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "franchise-ranking",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "franchise_perf",
+                  "fields": [
+                    {
+                      "name": "franchise_name",
+                      "expression": "`franchise_name`"
+                    },
+                    {
+                      "name": "franchise_city",
+                      "expression": "`franchise_city`"
+                    },
+                    {
+                      "name": "franchise_country",
+                      "expression": "`franchise_country`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    },
+                    {
+                      "name": "orders",
+                      "expression": "`orders`"
+                    },
+                    {
+                      "name": "avg_ticket",
+                      "expression": "`avg_ticket`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "franchise_name",
+                    "displayName": "Franquia"
+                  },
+                  {
+                    "fieldName": "franchise_city",
+                    "displayName": "Cidade"
+                  },
+                  {
+                    "fieldName": "franchise_country",
+                    "displayName": "País"
+                  },
+                  {
+                    "fieldName": "revenue",
+                    "displayName": "Receita ($)"
+                  },
+                  {
+                    "fieldName": "orders",
+                    "displayName": "Pedidos"
+                  },
+                  {
+                    "fieldName": "avg_ticket",
+                    "displayName": "Ticket médio ($)"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Top 15 franquias por receita"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 19,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "sentiment-bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sentiment",
+                  "fields": [
+                    {
+                      "name": "sentiment",
+                      "expression": "`sentiment`"
+                    },
+                    {
+                      "name": "review_count",
+                      "expression": "`review_count`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sentiment",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Sentimento"
+                },
+                "y": {
+                  "fieldName": "review_count",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Reviews"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Sentimento dos reviews (IA)"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 19,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ]
+}
