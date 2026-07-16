@@ -1,0 +1,27 @@
+# Job that orchestrates the medallion pipeline.
+# The job does not re-implement the layer ordering — the pipeline already owns the
+# bronze -> silver -> gold dependency graph, so the job's job is to trigger it on a
+# schedule and to be the thing that alerts when a refresh fails.
+resources:
+  jobs:
+    bakehouse_medallion_job:
+      name: "[${bundle.target}] bakehouse_medallion_job"
+      description: "Refreshes the Bakehouse medallion pipeline (bronze -> silver -> gold)."
+
+      tasks:
+        - task_key: refresh_medallion
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.bakehouse_medallion.id}
+
+      schedule:
+        # 06:00 America/Sao_Paulo, daily. The dev target's preset pauses this automatically.
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: America/Sao_Paulo
+
+      email_notifications:
+        on_failure:
+          - mateusvbkasuya@gmail.com
+
+      # A refresh that has not finished in an hour is stuck, not slow.
+      max_concurrent_runs: 1
+      timeout_seconds: 3600

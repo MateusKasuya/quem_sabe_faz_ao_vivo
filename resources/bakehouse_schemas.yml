@@ -1,0 +1,23 @@
+# One schema per medallion layer. The schema IS the layer, so tables are never
+# prefixed: bronze.customers -> silver.customers -> gold.top_customers.
+#
+# The catalog itself (bakehouse_dev / bakehouse_prod) is NOT declared here: this is a
+# Free Edition workspace with Default Storage, where catalogs can only be created via
+# SQL. The bundle 'catalogs:' resource uses the REST API, which fails with
+# "Metastore storage root URL does not exist". The catalogs already exist.
+resources:
+  schemas:
+    bronze:
+      catalog_name: ${var.catalog}
+      name: bronze
+      comment: "Bronze — raw ingestion from ${var.source_catalog}.${var.source_schema}, with ingestion metadata."
+
+    silver:
+      catalog_name: ${var.catalog}
+      name: silver
+      comment: "Silver — cleaned, typed and conformed data with quality expectations."
+
+    gold:
+      catalog_name: ${var.catalog}
+      name: gold
+      comment: "Gold — BI-ready marts powering the Bakehouse AI/BI dashboard."

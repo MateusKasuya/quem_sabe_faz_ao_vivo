@@ -1,0 +1,13 @@
+# AI/BI (Lakeview) dashboard over the gold layer.
+#
+# The .lvdash.json deliberately uses UNQUALIFIED table names (e.g. 'FROM sales_by_product').
+# dataset_catalog/dataset_schema resolve them at deploy time, so the exact same dashboard
+# file serves dev (bakehouse_dev.gold) and prod (bakehouse_prod.gold) with no edits.
+resources:
+  dashboards:
+    bakehouse_executive:
+      display_name: "[${bundle.target}] Bakehouse — Visão Executiva"
+      file_path: ../src/dashboards/bakehouse.lvdash.json
+      warehouse_id: ${var.warehouse_id}
+      dataset_catalog: ${var.catalog}
+      dataset_schema: ${resources.schemas.gold.name}

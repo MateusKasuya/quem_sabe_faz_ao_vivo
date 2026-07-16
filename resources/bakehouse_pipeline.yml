@@ -1,0 +1,30 @@
+# A single serverless Lakeflow Declarative Pipeline builds all three layers.
+# One pipeline (not three) keeps the full bronze -> silver -> gold dependency graph
+# in one place, so Lakeflow resolves ordering and incremental refresh by itself.
+resources:
+  pipelines:
+    bakehouse_medallion:
+      name: "[${bundle.target}] bakehouse_medallion"
+      catalog: ${var.catalog}
+      # Default schema for anything unqualified; every table below is explicitly qualified.
+      schema: ${resources.schemas.bronze.name}
+      serverless: true
+      photon: true
+      channel: CURRENT
+      continuous: false
+
+      root_path: ../src/pipelines/bakehouse
+      libraries:
+        - glob:
+            include: ../src/pipelines/bakehouse/transformations/**
+
+      # These become ${...} substitutions inside the SQL files. Binding them to the
+      # schema resources (instead of hardcoding 'bronze') keeps one source of truth:
+      # whatever the bundle names a schema, the SQL follows.
+      configuration:
+        medallion_catalog: ${var.catalog}
+        bronze_schema: ${resources.schemas.bronze.name}
+        silver_schema: ${resources.schemas.silver.name}
+        gold_schema: ${resources.schemas.gold.name}
+        source_catalog: ${var.source_catalog}
+        source_schema: ${var.source_schema}
