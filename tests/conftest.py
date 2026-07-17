@@ -1,6 +1,8 @@
 """This file configures pytest, initializes Databricks Connect, and provides fixtures for Spark and loading test data."""
 
-import os, sys, pathlib
+import os
+import sys
+import pathlib
 from contextlib import contextmanager
 
 
@@ -82,6 +84,12 @@ def _allow_stderr_output(config: pytest.Config):
 
 def pytest_configure(config: pytest.Config):
     """Configure pytest session."""
+    # Os testes offline (estrutura do SQL/bundle) nao precisam de cluster. Sem esta guarda
+    # o pytest abre uma sessao Databricks Connect so para coletar — no CI isso exigiria
+    # credencial e ~2min para nao testar Spark nenhum.
+    if os.environ.get("DATABRICKS_SKIP_CONNECT") == "1":
+        return
+
     with _allow_stderr_output(config):
         _enable_fallback_compute()
 
