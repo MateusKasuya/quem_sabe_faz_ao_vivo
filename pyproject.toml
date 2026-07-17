@@ -18,7 +18,11 @@ dev = [
     "databricks-dlt",
     "databricks-connect>=15.4,<15.5",
     "ipykernel",
+    "pyyaml",          # os testes leem resources/bakehouse_pipeline.yml
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [project.scripts]
 main = "quem_sabe_faz_ao_vivo.main:main"
@@ -32,3 +36,7 @@ packages = ["src"]
 
 [tool.ruff]
 line-length = 120
+# .claude/ sao as skills do AI Dev Kit (nao versionadas no git).
+# O notebook e feito de celulas %sql: o ruff le como Python e acusa 'invalid-syntax'
+# que sao falsos positivos, nao bugs.
+extend-exclude = [".claude", "scripts/*.ipynb"]
